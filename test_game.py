@@ -78,6 +78,5 @@ class TestCalcAndHang(unittest.TestCase):
         self.assertEqual(scores[3]["name"], "Fatma") 
         self.assertEqual(scores[4]["name"], "Ali")  
 
-# Bu satır, dosyanın doğrudan çalıştırıldığında testleri başlatmasını sağlar
 if __name__ == '__main__':
     unittest.main()
