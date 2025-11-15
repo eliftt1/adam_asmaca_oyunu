@@ -74,7 +74,7 @@ HANGMAN_STAGES = [
 
 
 def kategori_verisi():
-    """Kelime ve kategorileri döndürür."""
+    """Oyun için kullanılacak kelime kategorilerini ve her kategoriye ait kelime listesini döndürür."""
     return {
         "meyveler": ["elma", "kiraz", "kayısı", "şeftali", "erik", "karadut", "muz", "çilek", "portakal", "karpuz", "armut", "kivi", "ananas", "mango", "üzüm", "ayva"],
         "sebzeler": ["domates", "patlıcan", "bamya", "enginar", "soğan", "salatalık", "havuç", "patates", "ıspanak", "biber", "kabak", "lahana", "brokoli", "pırasa"],
@@ -94,7 +94,7 @@ def rastegele_kelime_secimi(words_dict):
 
 
 def oyun_ekrani(masked, guessed_letters, errors, bonus, kategori_known=False, kategori=None):
-    """Oyun durumunu ekrana yazdırır."""
+    """Oyunun mevcut durumunu ekrana yazdırır; maskeli kelimeyi, tahmin edilen harfleri, kalan hata hakkını, bonus puanını ve gerekirse kategori ipucunu gösterir."""
     print(Fore.CYAN + HANGMAN_STAGES[errors])
     print(Fore.WHITE + "\nKelime: ", " ".join(masked))
     print(Fore.MAGENTA + "Tahmin edilen harfler:", ", ".join(sorted(guessed_letters)) if guessed_letters else "Henüz Yok")
@@ -105,6 +105,7 @@ def oyun_ekrani(masked, guessed_letters, errors, bonus, kategori_known=False, ka
 
 
 def rastgele_harf_sec(kelime, masked):
+    """Maskelenmiş kelime üzerinde açılmamış harflerden rastgele birini seçip tüm eşleşen konumlarda açar ve açılan harfi döndürür; açılacak harf yoksa None döndürür."""
     unopened = [i for i, ch in enumerate(masked) if ch == "_"]
     if not unopened:
         return None
@@ -117,7 +118,7 @@ def rastgele_harf_sec(kelime, masked):
 
 
 def skor_kaydet(name, score):
-    """scores.json'a kaydeder; en yüksek 5 skoru tutar."""
+    """Verilen oyuncu skorunu scores.json dosyasına kaydeder ve listeyi en yüksek 5 skorla sınırlayarak günceller."""
     entry = {"name": name, "score": score, "date": datetime.now().isoformat()}
     scores = []
     if os.path.exists(SCORES_FILE):
@@ -133,7 +134,7 @@ def skor_kaydet(name, score):
 
 
 def skor_tablosu():
-    """scores.json'daki en iyi 5 skoru gösterir."""
+    """scores.json dosyasını okuyarak en yüksek 5 skoru ekranda listeler"""
     if not os.path.exists(SCORES_FILE):
         print(Fore.YELLOW + "Henüz skor kaydı yok.")
         return
@@ -154,7 +155,7 @@ def skor_tablosu():
 
 
 def sayi_al(prompt):
-    """Kullanıcıdan sayı isteme yardımcı fonksiyonu."""
+    """Kullanıcıdan geçerli bir sayı alır; hatalı girişte uyarı verir ve 'iptal' yazılırsa None döndürür."""
     while True:
         val = input(Fore.WHITE + prompt).strip()
         if val.lower() == "iptal":
@@ -166,6 +167,7 @@ def sayi_al(prompt):
 
 
 def matematik_oyunu(used_ops):
+    """Kullanıcının seçtiği matematik işlemini çözmesini sağlayan mini oyun; doğru/yanlış durumunu ve seçilen işlemin geçerliliğini kontrol ederek sonuç döndürür."""
     ops_map = {"+": "toplama", "-": "çıkarma", "*": "çarpma", "/": "bölme"}
     available = [k for k in ops_map.keys() if k not in used_ops]
     if not available:
@@ -209,6 +211,9 @@ def matematik_oyunu(used_ops):
 
 
 def play_game():
+    """Bu fonksiyon; rastgele bir kategori ve kelime seçer, maskelenmiş kelimeyi oluşturur ve oyuncuya her turda seçim sunar (harf tahmini, matematik işlemi yapma, ipucu alma veya oyundan çıkma).
+    Hataları, bonusları, skor değişimlerini ve kullanılan işlemleri takip eder. Oyuncu tüm harfleri açtığında veya hata hakkı dolduğunda oyunu sonlandırır.
+    Oyun bitiminde puanı gösterir, isterse skor tablosuna kaydeder ve mevcut skor listesini ekrana yazdırır."""
     words = kategori_verisi()
     kategori, kelime = rastegele_kelime_secimi(words)
     masked = ["_" for _ in kelime]
@@ -288,7 +293,7 @@ def play_game():
             print(Fore.RED + "Geçersiz seçim. Lütfen 1,2,3 veya q girin.")
             continue
 
-        # 🔹 Son harf bulunduysa ekran güncellensin ve mesaj tek satırda gösterilsin
+        #  Son harf bulunduysa ekran güncellensin ve mesaj tek satırda gösterilsin
         if "_" not in masked:
             oyun_ekrani(masked, guessed, errors, bonus, kategori_revealed, kategori if kategori_revealed else None)
             print(Fore.GREEN + f"Tebrikler! Tüm harfleri buldunuz.")
